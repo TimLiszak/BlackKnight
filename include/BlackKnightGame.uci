@@ -39,5 +39,5 @@ DefaultProperties
     DefaultPawnClass=class'`{GAMEMODE}Pawn'
 	
 	//This is the name that shows in the server browser for this mod:
-	ModDisplayString="Black Knight"
+	ModDisplayString="Black Knight v1.1"
 }

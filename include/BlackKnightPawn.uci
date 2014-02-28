@@ -361,7 +361,7 @@ reliable server function AttackOtherPawn(HitInfo Info, string DamageString, opti
 		if (Other.bLostRightArm)
 		{
 			// If it's a right handed weapon
-			if (Other.IsLeftHandedWeapon())
+			if (Other.IsRightHandedWeapon())
 			{
 				// Can't parry without right arm
 				Other.StateVariables.bIsParrying = false;
@@ -442,10 +442,25 @@ simulated function NoHeadDeath()
 
 simulated event Tick( float DeltaTime )
 {
+	local name beginSocketName;
+	local name endSocketName;
+
 	super.Tick(DeltaTime);
 
 	if (IsLocallyControlled())
 	{
+		if (AOCWeaponAttachment_Fists(CurrentWeaponAttachment) != None)
+		{
+			AOCWeaponAttachment_Fists(CurrentWeaponAttachment).GetTracerSocketNames(beginSocketName, endSocketName, 0);
+			if (bLostLeftArm && endSocketName == 'LeftHand')
+			{
+				CurrentWeaponAttachment.GotoState('Invalid');
+			}
+			if (bLostRightArm && endSocketName == 'RightHand')
+			{
+				CurrentWeaponAttachment.GotoState('Invalid');
+			}
+		}
 		if (bLostLeftArm && IsLeftHandedWeapon())
 		{
 			CurrentWeaponAttachment.GotoState('Invalid');
