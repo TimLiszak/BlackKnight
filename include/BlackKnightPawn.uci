@@ -18,6 +18,9 @@ var bool bGoreInitialized;
 
 var array<name> HiddenBones;
 
+var Controller DecapController;
+var string DecapDamageString;
+
 replication
 {
 	if ( bNetDirty && !bNetOwner)
@@ -393,6 +396,8 @@ reliable server function AttackOtherPawn(HitInfo Info, string DamageString, opti
 	{
 		if (Info.BoneName == 'b_Neck' || Other.Mesh.BoneIsChildOf(Info.BoneName, 'b_Neck'))
 		{
+			Other.DecapController = Controller;
+			Other.DecapDamageString = DamageString $ "3";
 			Other.LoseHead();
 		}
 		else if (Info.BoneName == 'b_l_shoulder' || Other.Mesh.BoneIsChildOf(Info.BoneName, 'b_l_shoulder'))
@@ -424,6 +429,14 @@ simulated function StartFire(byte FireModeNum)
 			return;
 		}
 	}
+	if (bLostLeftArm && AOCWeapon_Longbow(Weapon) != None)
+	{
+		if (FireModeNum == Attack_Slash)
+		{
+			// Can't fire without a bow
+			return;
+		}
+	}
 
 	super.StartFire(FireModeNum);
 }
@@ -431,13 +444,18 @@ simulated function StartFire(byte FireModeNum)
 simulated function SwitchToDecapMesh()
 {
 	InitGoreMesh();
+	
+	if(PawnCharacter.default.bCanDecap)
+	{
+		bIsDecappable = true;
+	}
 }
 
 simulated function NoHeadDeath()
 {
-	ReplicatedHitInfo.DamageString = "M";
+	ReplicatedHitInfo.DamageString = DecapDamageString;
 	ReplicatedHitInfo.bBreakAllBones = false;
-	TakeDamage(500.0f, none, Vect(0.0f,0.0f,0.0f),Vect(0.0f,0.0f,0.0f), class'AOCDmgType_Generic');
+	TakeDamage(500.0f, DecapController, Vect(0.0f,0.0f,0.0f),Vect(0.0f,0.0f,0.0f), class'AOCDmgType_Generic');
 }
 
 simulated event Tick( float DeltaTime )
@@ -503,6 +521,19 @@ simulated function bool ShouldJustHideBone(name BoneName)
 		}
 	}
 	return false;
+}
+
+simulated function WeaponAttachmentChanged()
+{
+	local rotator RelativeRot;
+	
+	super.WeaponAttachmentChanged();
+	
+	if (AOCWeaponAttachment_QuarterStaff(CurrentWeaponAttachment) != None)
+	{
+		RelativeRot.Roll = -16384;
+		Mesh.AttachComponent(CurrentWeaponAttachment.Mesh, 'B_L_WEAPON', , RelativeRot);
+	}
 }
 
 DefaultProperties
