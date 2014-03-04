@@ -93,18 +93,6 @@ simulated function float PlayBloodSpurt(name BoneName, optional int RotateOffset
 	return myLifespan;
 }
 
-simulated function PlayDecapBlood()
-{
-	local float myLifespan;
-
-	myLifespan = PlayBloodSpurt('b_Head');
-
-	if (!IsTimerActive('PlayDecapBlood'))
-	{
-		SetTimer(myLifespan, true, 'PlayDecapBlood');
-	}
-}
-
 simulated function SetCharacterMeshInfo(SkeletalMesh SkelMesh, MaterialInterface HeadMaterial, MaterialInterface BodyMaterial)
 {
 	LogAlwaysInternal(">> SetCharacterMeshInfo");
@@ -134,13 +122,6 @@ simulated function SetCharacterMeshInfo(SkeletalMesh SkelMesh, MaterialInterface
 
 	Mesh.MinDistFactorForKinematicUpdate = 0.0f;
 	Mesh.SetRBLinearVelocity(Vect(0.0f,0.0f,0.0f));
-}
-
-simulated function InitDecapHead()
-{
-	Mesh.HideBoneByName('b_Head', PBO_Term);
-
-	PlayDecapBlood();
 }
 
 simulated function LoseHead()
@@ -326,6 +307,10 @@ simulated function bool IsLeftHandedWeapon()
 {
 	local name HitActorAttachmentBoneName;
 	HitActorAttachmentBoneName = Mesh.GetSocketBoneName(AOCWeaponAttachment(CurrentWeaponAttachment).WeaponSocket);
+	if (AOCWeaponAttachment(CurrentWeaponAttachment).bUseAlternativeTracers)
+	{
+		return true;
+	}
 	if (Mesh.BoneIsChildOf(HitActorAttachmentBoneName, 'b_l_Shoulder'))
 	{
 		return true;
@@ -337,6 +322,10 @@ simulated function bool IsRightHandedWeapon()
 {
 	local name HitActorAttachmentBoneName;
 	HitActorAttachmentBoneName = Mesh.GetSocketBoneName(AOCWeaponAttachment(CurrentWeaponAttachment).WeaponSocket);
+	if (AOCWeaponAttachment(CurrentWeaponAttachment).bUseAlternativeTracers)
+	{
+		return false;
+	}
 	if (Mesh.BoneIsChildOf(HitActorAttachmentBoneName, 'b_r_Shoulder'))
 	{
 		return true;
@@ -536,8 +525,27 @@ simulated function WeaponAttachmentChanged()
 	}
 }
 
+simulated function SetCharacterAppearanceFromInfo(class<AOCCharacterInfo> Info)
+{
+	local rotator RelativeRot;
+	
+	super.SetCharacterAppearanceFromInfo(Info);
+	
+	if (class<AOCFamilyInfo_Mason_Knight>(PawnFamily) != None)
+	{
+		RelativeRot.Roll = -16384;
+		RelativeRot.Pitch = 16384;
+		RelativeRot.Yaw = 0;
+		Mesh.AttachComponent(ParryComponent, 'b_forhead', , RelativeRot);
+	}
+}
+
 DefaultProperties
 {
+	Begin Object Name=WPawnSkeletalMeshComponent
+		bUpdateKinematicBonesFromAnimation=true
+	End Object
+
 	// Disable foot IK
 	LeftFootControlName=
 	RightFootControlName=
