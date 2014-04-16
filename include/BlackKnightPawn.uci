@@ -96,7 +96,7 @@ simulated function float PlayBloodSpurt(name BoneName, optional int RotateOffset
 simulated function SetCharacterMeshInfo(SkeletalMesh SkelMesh, MaterialInterface HeadMaterial, MaterialInterface BodyMaterial)
 {
 	LogAlwaysInternal(">> SetCharacterMeshInfo");
-	if (WorldInfo.NetMode == NM_DedicatedServer && class<AOCFamilyInfo_Mason_Knight>(PawnFamily) != None)
+	if (WorldInfo.NetMode == NM_DedicatedServer && AOCFamilyInfo_Mason_Knight(PawnFamily) != None)
 	{
 		// bad camera socket
 	}
@@ -491,18 +491,18 @@ simulated event Tick( float DeltaTime )
 
 simulated function bool ShouldJustHideBone(name BoneName)
 {
-	if (class<AOCFamilyInfo_Agatha_King>(PawnFamily) != None || class<AOCFamilyInfo_Mason_King>(PawnFamily) != None)
+	if (AOCFamilyInfo_Agatha_King(PawnFamily) != None || AOCFamilyInfo_Mason_King(PawnFamily) != None)
 	{
 		return true;
 	}
-	else if (class<AOCFamilyInfo_ManAtArms>(PawnFamily) != None)
+	else if (AOCFamilyInfo_ManAtArms(PawnFamily) != None)
 	{
 		if (BoneName == 'b_l_knee' || BoneName == 'b_r_knee')
 		{
 			return true;
 		}
 	}
-	else if (class<AOCFamilyInfo_Vanguard>(PawnFamily) != None)
+	else if (AOCFamilyInfo_Vanguard(PawnFamily) != None)
 	{
 		if (BoneName == 'b_Neck' || BoneName == 'b_l_Shoulder' || BoneName == 'b_r_Shoulder')
 		{
@@ -531,7 +531,7 @@ simulated function SetCharacterAppearanceFromInfo(class<AOCCharacterInfo> Info)
 	
 	super.SetCharacterAppearanceFromInfo(Info);
 	
-	if (class<AOCFamilyInfo_Mason_Knight>(PawnFamily) != None)
+	if (AOCFamilyInfo_Mason_Knight(PawnFamily) != None)
 	{
 		RelativeRot.Roll = -16384;
 		RelativeRot.Pitch = 16384;
